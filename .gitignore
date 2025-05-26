@@ -1,0 +1,7 @@
+# Ignore qifs files and directories
+qifs
+qifs/
+
+# Ignore vectorstore files and directories
+vectorstore
+vectorstore/

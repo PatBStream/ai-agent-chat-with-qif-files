@@ -1,0 +1,13 @@
+services:
+  qif-agent:
+    build: .
+    volumes:
+      - ./qifs:/qifs:ro
+      - ./vectorstore:/vectorstore
+    environment:
+      - QIF_DIR=/qifs
+      - VECTORSTORE_DIR=/vectorstore
+      # Use host.docker.internal so container can reach Ollama on host
+      - OLLAMA_URL=http://host.docker.internal:11434
+    ports:
+      - "8000:8000"
