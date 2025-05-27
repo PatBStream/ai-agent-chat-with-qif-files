@@ -1,13 +1,22 @@
+# ---------------------------
+# docker-compose.yml
+# ---------------------------
 services:
   qif-agent:
     build: .
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --log-level info
     volumes:
-      - ./qifs:/qifs:ro
+      - ./qifs:/qifs    # QIF files mounted read-only
       - ./vectorstore:/vectorstore
+      - ./db:/db          # Database storage
     environment:
       - QIF_DIR=/qifs
       - VECTORSTORE_DIR=/vectorstore
-      # Use host.docker.internal so container can reach Ollama on host
+      - DB_PATH=/db/transactions.db
       - OLLAMA_URL=http://host.docker.internal:11434
     ports:
       - "8000:8000"

@@ -1,6 +1,9 @@
 fastapi
 uvicorn[standard]
+langchain
 langchain-community
+langchain_experimental
+sqlalchemy
 qifparse
 faiss-cpu
 sentence-transformers
