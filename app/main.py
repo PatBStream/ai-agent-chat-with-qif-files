@@ -8,8 +8,6 @@ import re
 import json
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
-#from langchain.chains import RetrievalQA
-#from langchain_experimental.sql import SQLDatabaseChain
 from langchain_community.utilities import SQLDatabase
 from langchain_community.llms import Ollama
 from sqlalchemy import text

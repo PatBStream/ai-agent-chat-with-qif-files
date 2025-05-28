@@ -3,7 +3,6 @@ import re
 import pandas as pd
 import logging
 from sqlalchemy import create_engine, Column, Float, String, Date, MetaData, Table
-from qifparse.parser import QifParser
 from datetime import date
 
 class QIFIndexer:
