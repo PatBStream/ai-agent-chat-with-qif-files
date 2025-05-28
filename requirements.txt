@@ -4,8 +4,6 @@ langchain
 langchain-community
 sqlalchemy
 qifparse
-faiss-cpu
-sentence-transformers
 python-dotenv
 requests
 pandas
