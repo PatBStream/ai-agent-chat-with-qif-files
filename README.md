@@ -2,7 +2,7 @@
 
 **QIF Agent** is an AI-powered financial assistant that lets you chat with your own QIF (Quicken Interchange Format) data. It parses your QIF files, stores transactions in a SQLite database, and uses an LLM (via [Ollama](https://ollama.com/)) to answer natural language questions about your finances. The project includes a FastAPI backend and a Streamlit-based web UI.
 
-Start the web UI, then ask it queries like
+Start the Streamlib web UI, then ask it queries like
 - List all transactions from 2021 where category like Util or like Electric
 - What the sum total for all of 2018 where the category like Dues?
 

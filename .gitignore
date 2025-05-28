@@ -4,3 +4,4 @@ qifs/
 db
 db/
 *.qifs
+*token*
