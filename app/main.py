@@ -177,7 +177,7 @@ async def chat(query: dict):
             try:
                 obj = json.loads(line_decoded)
                 sql += obj.get("response", "")
-            except Exception:
+            except Exception as e:
                 logger.warning(f"Failed to parse JSON: {e} | Line: {line_decoded}")
                 continue
 
