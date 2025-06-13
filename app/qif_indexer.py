@@ -3,7 +3,7 @@ import re
 import pandas as pd
 import logging
 from sqlalchemy import create_engine, Column, Float, String, Date, MetaData, Table
-from datetime import date
+from datetime import date, datetime
 
 class QIFIndexer:
     def __init__(self, qif_dir: str, db_path: str):
