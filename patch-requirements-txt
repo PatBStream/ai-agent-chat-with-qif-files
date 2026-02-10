@@ -1,0 +1,19 @@
+diff --git a/requirements.txt b/requirements.txt
+index 5d634a732691d2c35bf94cfa34b7fb43851512c4..de44ace76fa66cea2dac0f1987f132c3908d03ba 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -1,9 +1,5 @@
+-fastapi
+-uvicorn[standard]
+-langchain
+-langchain-community
+-sqlalchemy
+-qifparse
+-python-dotenv
+-requests
+-pandas
++fastapi>=0.115,<1.0
++uvicorn[standard]>=0.30,<1.0
++sqlalchemy>=2.0,<3.0
++requests>=2.32,<3.0
++pandas>=2.2,<3.0

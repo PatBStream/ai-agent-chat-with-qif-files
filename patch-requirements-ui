@@ -1,0 +1,9 @@
+diff --git a/ui/requirements.txt b/ui/requirements.txt
+index 885ed68e39af13a6ffe9dfa8f526890717d6794e..1d6368ccb1ccf24e99ed74369dc3fd8c6e88e5e8 100644
+--- a/ui/requirements.txt
++++ b/ui/requirements.txt
+@@ -1,2 +1,2 @@
+-streamlit
+-requests
++streamlit>=1.40,<2.0
++requests>=2.32,<3.0
