@@ -1,11 +1,13 @@
 import streamlit as st
 import requests
 import os
+from datetime import datetime
 
 QIF_API_URL = os.environ.get("QIF_API_URL", "http://qif-agent:8000")
 
 st.set_page_config(page_title="Chat with My QIF Agent", page_icon="💸", layout="centered")
 st.title("💸 Chat with My QIF Agent")
+st.caption(f"Today is {datetime.now().strftime('%A, %B %d, %Y at %I:%M:%S %p')}")
 st.markdown("""
     Ask questions about your finances! 
     The agent is trained on your QIF files and can answer queries about transactions.
