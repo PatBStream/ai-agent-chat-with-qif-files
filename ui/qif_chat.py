@@ -12,6 +12,8 @@ if "history" not in st.session_state:
     st.session_state.history = []
 if "is_processing" not in st.session_state:
     st.session_state.is_processing = False
+if "pending_question" not in st.session_state:
+    st.session_state.pending_question = None
 
 status_icon = "⏳" if st.session_state.is_processing else "✅"
 status_text = "Processing" if st.session_state.is_processing else "Ready"
@@ -19,70 +21,75 @@ status_text = "Processing" if st.session_state.is_processing else "Ready"
 st.markdown(
     f"""
     <style>
-      .app-shell-top-padding {{
-        padding-top: 5rem;
-      }}
-
-      .app-fixed-header {{
-        position: fixed;
+      div[data-testid="stVerticalBlock"] div:has(> #qif-topbar-anchor) {{
+        position: sticky;
         top: 0;
-        left: 0;
-        right: 0;
-        z-index: 9999;
-        background: rgba(14, 17, 23, 0.95);
-        border-bottom: 1px solid rgba(250, 250, 250, 0.15);
-        backdrop-filter: blur(4px);
-        padding: 0.55rem 1rem;
+        z-index: 1000;
       }}
 
-      .app-fixed-header-content {{
-        max-width: 46rem;
-        margin: 0 auto;
+      #qif-topbar {{
+        border: 1px solid rgba(49, 51, 63, 0.25);
+        background: rgba(255, 255, 255, 0.95);
+        color: #111111;
+        backdrop-filter: blur(6px);
+        border-radius: 0.5rem;
+        padding: 0.45rem 0.75rem;
+        margin-bottom: 0.75rem;
+      }}
+
+      @media (prefers-color-scheme: dark) {{
+        #qif-topbar {{
+          background: rgba(14, 17, 23, 0.95);
+          color: #fafafa;
+          border: 1px solid rgba(250, 250, 250, 0.2);
+        }}
+      }}
+
+      #qif-topbar-content {{
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 0.75rem;
-        color: #fafafa;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
       }}
 
-      .app-header-right {{
+      #qif-topbar-right {{
         display: flex;
         align-items: center;
-        gap: 0.8rem;
+        gap: 0.65rem;
+        flex-shrink: 0;
       }}
 
-      .app-nav-arrow {{
-        color: #fafafa;
+      .qif-status-pill {{
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        padding: 0.12rem 0.45rem;
+        white-space: nowrap;
+      }}
+
+      .qif-nav-arrow {{
         text-decoration: none;
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         line-height: 1;
       }}
 
-      .app-nav-arrow:hover {{
-        opacity: 0.8;
-      }}
-
-      .app-status-pill {{
-        border: 1px solid rgba(250, 250, 250, 0.35);
-        border-radius: 999px;
-        padding: 0.15rem 0.5rem;
-        white-space: nowrap;
+      .qif-nav-arrow:hover {{
+        opacity: 0.75;
       }}
     </style>
 
     <a id="page-top"></a>
-    <div class="app-fixed-header">
-      <div class="app-fixed-header-content">
+    <div id="qif-topbar-anchor"></div>
+    <div id="qif-topbar">
+      <div id="qif-topbar-content">
         <div><strong>{datetime.now().strftime('%A, %B %d, %Y at %I:%M:%S %p')}</strong></div>
-        <div class="app-header-right">
-          <span class="app-status-pill">{status_icon} {status_text}</span>
-          <a class="app-nav-arrow" href="#page-top" title="Go to top">⬆️</a>
-          <a class="app-nav-arrow" href="#page-bottom" title="Go to bottom">⬇️</a>
+        <div id="qif-topbar-right">
+          <span class="qif-status-pill">{status_icon} {status_text}</span>
+          <a class="qif-nav-arrow" href="#page-top" title="Go to top">⬆️</a>
+          <a class="qif-nav-arrow" href="#page-bottom" title="Go to bottom">⬇️</a>
         </div>
       </div>
     </div>
-    <div class="app-shell-top-padding"></div>
     """,
     unsafe_allow_html=True,
 )
@@ -111,18 +118,24 @@ user_input = st.chat_input(
 
 if user_input:
     st.session_state.history.append({"role": "user", "content": user_input})
-
+    st.session_state.pending_question = user_input
     st.session_state.is_processing = True
+    st.rerun()
+
+if st.session_state.pending_question:
     with st.spinner("Processing your request..."):
         try:
             resp = requests.post(
-                f"{QIF_API_URL}/chat", json={"question": user_input}, timeout=60
+                f"{QIF_API_URL}/chat",
+                json={"question": st.session_state.pending_question},
+                timeout=60,
             )
             answer = resp.json().get("answer", "No answer.")
         except Exception as e:
             answer = f"❌ Error: {e}"
 
     st.session_state.history.append({"role": "assistant", "content": answer})
+    st.session_state.pending_question = None
     st.session_state.is_processing = False
     st.rerun()
 
