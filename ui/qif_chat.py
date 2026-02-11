@@ -21,35 +21,31 @@ status_text = "Processing" if st.session_state.is_processing else "Ready"
 st.markdown(
     f"""
     <style>
-      div.block-container {{
-        padding-top: 6.2rem !important;
+      div[data-testid="stVerticalBlock"] div:has(> #qif-topbar-anchor) {{
+        position: sticky;
+        top: 0;
+        z-index: 1000;
       }}
 
-      .qif-floating-title-bar {{
-        position: fixed;
-        top: 0.75rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: min(900px, calc(100vw - 1rem));
-        z-index: 999999;
+      #qif-topbar {{
         border: 1px solid rgba(49, 51, 63, 0.25);
-        background: rgba(255, 255, 255, 0.97);
+        background: rgba(255, 255, 255, 0.95);
         color: #111111;
-        border-radius: 0.6rem;
-        backdrop-filter: blur(7px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-        padding: 0.55rem 0.8rem;
+        backdrop-filter: blur(6px);
+        border-radius: 0.5rem;
+        padding: 0.45rem 0.75rem;
+        margin-bottom: 0.75rem;
       }}
 
       @media (prefers-color-scheme: dark) {{
-        .qif-floating-title-bar {{
-          background: rgba(14, 17, 23, 0.97);
+        #qif-topbar {{
+          background: rgba(14, 17, 23, 0.95);
           color: #fafafa;
           border: 1px solid rgba(250, 250, 250, 0.2);
         }}
       }}
 
-      .qif-title-content {{
+      #qif-topbar-content {{
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -57,17 +53,18 @@ st.markdown(
         font-size: 0.92rem;
       }}
 
-      .qif-right-icons {{
-        display: inline-flex;
+      #qif-topbar-right {{
+        display: flex;
         align-items: center;
         gap: 0.65rem;
-        white-space: nowrap;
+        flex-shrink: 0;
       }}
 
       .qif-status-pill {{
         border: 1px solid currentColor;
         border-radius: 999px;
         padding: 0.12rem 0.45rem;
+        white-space: nowrap;
       }}
 
       .qif-nav-arrow {{
@@ -79,23 +76,14 @@ st.markdown(
       .qif-nav-arrow:hover {{
         opacity: 0.75;
       }}
-
-      @media (max-width: 640px) {{
-        .qif-title-content {{
-          font-size: 0.78rem;
-          gap: 0.4rem;
-        }}
-        .qif-right-icons {{
-          gap: 0.35rem;
-        }}
-      }}
     </style>
 
     <a id="page-top"></a>
-    <div class="qif-floating-title-bar">
-      <div class="qif-title-content">
+    <div id="qif-topbar-anchor"></div>
+    <div id="qif-topbar">
+      <div id="qif-topbar-content">
         <div><strong>{datetime.now().strftime('%A, %B %d, %Y at %I:%M:%S %p')}</strong></div>
-        <div class="qif-right-icons">
+        <div id="qif-topbar-right">
           <span class="qif-status-pill">{status_icon} {status_text}</span>
           <a class="qif-nav-arrow" href="#page-top" title="Go to top">⬆️</a>
           <a class="qif-nav-arrow" href="#page-bottom" title="Go to bottom">⬇️</a>
