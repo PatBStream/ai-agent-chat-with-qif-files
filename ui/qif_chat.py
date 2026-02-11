@@ -21,13 +21,10 @@ status_text = "Processing" if st.session_state.is_processing else "Ready"
 st.markdown(
     f"""
     <style>
-      div[data-testid="stVerticalBlock"] div:has(> #qif-topbar-anchor) {{
+      #qif-topbar {{
         position: sticky;
         top: 0;
         z-index: 1000;
-      }}
-
-      #qif-topbar {{
         border: 1px solid rgba(49, 51, 63, 0.25);
         background: rgba(255, 255, 255, 0.95);
         color: #111111;
@@ -79,7 +76,6 @@ st.markdown(
     </style>
 
     <a id="page-top"></a>
-    <div id="qif-topbar-anchor"></div>
     <div id="qif-topbar">
       <div id="qif-topbar-content">
         <div><strong>{datetime.now().strftime('%A, %B %d, %Y at %I:%M:%S %p')}</strong></div>
