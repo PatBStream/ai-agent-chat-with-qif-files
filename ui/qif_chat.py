@@ -14,6 +14,8 @@ if "is_processing" not in st.session_state:
     st.session_state.is_processing = False
 if "pending_question" not in st.session_state:
     st.session_state.pending_question = None
+if "results_container_height" not in st.session_state:
+    st.session_state.results_container_height = 420
 
 status_icon = "⏳" if st.session_state.is_processing else "✅"
 status_text = "Processing" if st.session_state.is_processing else "Ready"
@@ -91,6 +93,15 @@ st.markdown(
 )
 
 st.title("💸 Chat with My QIF Agent")
+
+clear_col, _ = st.columns([1, 8])
+with clear_col:
+    if st.button("🧹", help="Clear results", use_container_width=True):
+        st.session_state.history = []
+        st.session_state.pending_question = None
+        st.session_state.is_processing = False
+        st.rerun()
+
 st.markdown(
     """
     Ask questions about your finances!
@@ -135,8 +146,17 @@ if st.session_state.pending_question:
     st.session_state.is_processing = False
     st.rerun()
 
-for entry in st.session_state.history:
-    with st.chat_message(entry["role"]):
-        st.markdown(entry["content"])
+results_container = st.container(
+    height=st.session_state.results_container_height,
+    border=True,
+)
+
+with results_container:
+    if not st.session_state.history:
+        st.caption("No results yet. Ask a question to see responses here.")
+
+    for entry in st.session_state.history:
+        with st.chat_message(entry["role"]):
+            st.markdown(entry["content"])
 
 st.markdown('<a id="page-bottom"></a>', unsafe_allow_html=True)
