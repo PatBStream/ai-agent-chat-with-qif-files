@@ -17,13 +17,18 @@ if "pending_question" not in st.session_state:
 if "results_container_height" not in st.session_state:
     st.session_state.results_container_height = 420
 
-status_icon = "⏳" if st.session_state.is_processing else "✅"
-status_text = "Processing" if st.session_state.is_processing else "Ready"
+clear_query_param = st.query_params.get("clear")
+if clear_query_param == "1" or (isinstance(clear_query_param, list) and "1" in clear_query_param):
+    st.session_state.history = []
+    st.session_state.pending_question = None
+    st.session_state.is_processing = False
+    st.query_params.clear()
+    st.rerun()
 
 st.markdown(
-    f"""
+    """
     <style>
-      #qif-topbar {{
+      #qif-topbar {
         position: sticky;
         top: 0;
         z-index: 1000;
@@ -34,74 +39,55 @@ st.markdown(
         border-radius: 0.5rem;
         padding: 0.45rem 0.75rem;
         margin-bottom: 0.75rem;
-      }}
+      }
 
-      @media (prefers-color-scheme: dark) {{
-        #qif-topbar {{
+      @media (prefers-color-scheme: dark) {
+        #qif-topbar {
           background: rgba(14, 17, 23, 0.95);
           color: #fafafa;
           border: 1px solid rgba(250, 250, 250, 0.2);
-        }}
-      }}
+        }
+      }
 
-      #qif-topbar-content {{
+      #qif-topbar-content {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 0.75rem;
         font-size: 0.92rem;
-      }}
+      }
 
-      #qif-topbar-right {{
+      #qif-topbar-right {
         display: flex;
         align-items: center;
         gap: 0.65rem;
         flex-shrink: 0;
-      }}
+      }
 
-      .qif-status-pill {{
+      .qif-status-pill {
         border: 1px solid currentColor;
         border-radius: 999px;
         padding: 0.12rem 0.45rem;
         white-space: nowrap;
-      }}
+      }
 
-      .qif-nav-arrow {{
+      .qif-nav-arrow {
         text-decoration: none;
         font-size: 1.1rem;
         line-height: 1;
-      }}
+      }
 
-      .qif-nav-arrow:hover {{
+      .qif-nav-arrow:hover {
         opacity: 0.75;
-      }}
+      }
     </style>
 
     <a id="page-top"></a>
-    <div id="qif-topbar">
-      <div id="qif-topbar-content">
-        <div><strong>{datetime.now().strftime('%A, %B %d, %Y at %I:%M:%S %p')}</strong></div>
-        <div id="qif-topbar-right">
-          <span class="qif-status-pill">{status_icon} {status_text}</span>
-          <a class="qif-nav-arrow" href="#page-top" title="Go to top">⬆️</a>
-          <a class="qif-nav-arrow" href="#page-bottom" title="Go to bottom">⬇️</a>
-        </div>
-      </div>
-    </div>
     """,
     unsafe_allow_html=True,
 )
 
 st.title("💸 Chat with My QIF Agent")
-
-clear_col, _ = st.columns([1, 8])
-with clear_col:
-    if st.button("🧹", help="Clear results", use_container_width=True):
-        st.session_state.history = []
-        st.session_state.pending_question = None
-        st.session_state.is_processing = False
-        st.rerun()
-
 st.markdown(
     """
     Ask questions about your finances!
@@ -145,6 +131,26 @@ if st.session_state.pending_question:
     st.session_state.pending_question = None
     st.session_state.is_processing = False
     st.rerun()
+
+status_icon = "⏳" if st.session_state.is_processing else "✅"
+status_text = "Processing" if st.session_state.is_processing else "Ready"
+
+st.markdown(
+    f"""
+    <div id="qif-topbar">
+      <div id="qif-topbar-content">
+        <div><strong>{datetime.now().strftime('%A, %B %d, %Y at %I:%M:%S %p')}</strong></div>
+        <div id="qif-topbar-right">
+          <span class="qif-status-pill">{status_icon} {status_text}</span>
+          <a class="qif-nav-arrow" href="?clear=1#page-top" title="Clear results">🧹</a>
+          <a class="qif-nav-arrow" href="#page-top" title="Go to top">⬆️</a>
+          <a class="qif-nav-arrow" href="#page-bottom" title="Go to bottom">⬇️</a>
+        </div>
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 results_container = st.container(
     height=st.session_state.results_container_height,
