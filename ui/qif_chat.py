@@ -56,7 +56,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("💸 Chat with My QIF Agent")
+st.title("💸 Chat with QIF Files AI Agent")
 st.markdown(
     """
     Ask questions about your finances!
