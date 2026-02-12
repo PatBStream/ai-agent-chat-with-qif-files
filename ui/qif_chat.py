@@ -20,7 +20,7 @@ if "results_container_height" not in st.session_state:
 st.markdown(
     """
     <style>
-      #qif-topbar {
+      .qif-topbar-shell {
         position: sticky;
         top: 0;
         z-index: 1000;
@@ -34,26 +34,16 @@ st.markdown(
       }
 
       @media (prefers-color-scheme: dark) {
-        #qif-topbar {
+        .qif-topbar-shell {
           background: rgba(14, 17, 23, 0.95);
           color: #fafafa;
           border: 1px solid rgba(250, 250, 250, 0.2);
         }
       }
 
-      #qif-topbar-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.75rem;
+      .qif-topbar-time {
         font-size: 0.92rem;
-      }
-
-      #qif-topbar-right {
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-        flex-shrink: 0;
+        font-weight: 600;
       }
 
       .qif-status-pill {
@@ -61,15 +51,17 @@ st.markdown(
         border-radius: 999px;
         padding: 0.12rem 0.45rem;
         white-space: nowrap;
+        display: inline-block;
+        font-size: 0.9rem;
       }
 
-      .qif-nav-arrow {
+      .qif-nav-icon {
         text-decoration: none;
         font-size: 1.1rem;
         line-height: 1;
       }
 
-      .qif-nav-arrow:hover {
+      .qif-nav-icon:hover {
         opacity: 0.75;
       }
     </style>
@@ -127,30 +119,28 @@ if st.session_state.pending_question:
 status_icon = "⏳" if st.session_state.is_processing else "✅"
 status_text = "Processing" if st.session_state.is_processing else "Ready"
 
-st.markdown(
-    f"""
-    <div id="qif-topbar">
-      <div id="qif-topbar-content">
-        <div><strong>{datetime.now().strftime('%A, %B %d, %Y at %I:%M:%S %p')}</strong></div>
-        <div id="qif-topbar-right">
-          <span class="qif-status-pill">{status_icon} {status_text}</span>
-          <a class="qif-nav-arrow" href="#page-top" title="Go to top">⬆️</a>
-          <a class="qif-nav-arrow" href="#page-bottom" title="Go to bottom">⬇️</a>
-        </div>
-      </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+st.markdown('<div class="qif-topbar-shell">', unsafe_allow_html=True)
+left_col, status_col, clear_col, up_col, down_col = st.columns([6, 2.4, 1, 1, 1])
 
-
-clear_topbar_col, _ = st.columns([1, 12])
-with clear_topbar_col:
-    if st.button("🧹", help="Clear results", use_container_width=True):
+with left_col:
+    st.markdown(
+        f'<div class="qif-topbar-time">{datetime.now().strftime("%A, %B %d, %Y at %I:%M:%S %p")}</div>',
+        unsafe_allow_html=True,
+    )
+with status_col:
+    st.markdown(f'<span class="qif-status-pill">{status_icon} {status_text}</span>', unsafe_allow_html=True)
+with clear_col:
+    if st.button("🧹", help="Clear results", use_container_width=True, type="secondary"):
         st.session_state.history = []
         st.session_state.pending_question = None
         st.session_state.is_processing = False
         st.rerun()
+with up_col:
+    st.markdown('<a class="qif-nav-icon" href="#page-top" title="Go to top">⬆️</a>', unsafe_allow_html=True)
+with down_col:
+    st.markdown('<a class="qif-nav-icon" href="#page-bottom" title="Go to bottom">⬇️</a>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 results_container = st.container(
     height=st.session_state.results_container_height,
