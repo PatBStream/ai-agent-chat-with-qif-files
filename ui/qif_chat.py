@@ -17,14 +17,6 @@ if "pending_question" not in st.session_state:
 if "results_container_height" not in st.session_state:
     st.session_state.results_container_height = 420
 
-clear_query_param = st.query_params.get("clear")
-if clear_query_param == "1" or (isinstance(clear_query_param, list) and "1" in clear_query_param):
-    st.session_state.history = []
-    st.session_state.pending_question = None
-    st.session_state.is_processing = False
-    st.query_params.clear()
-    st.rerun()
-
 st.markdown(
     """
     <style>
@@ -142,7 +134,6 @@ st.markdown(
         <div><strong>{datetime.now().strftime('%A, %B %d, %Y at %I:%M:%S %p')}</strong></div>
         <div id="qif-topbar-right">
           <span class="qif-status-pill">{status_icon} {status_text}</span>
-          <a class="qif-nav-arrow" href="?clear=1#page-top" title="Clear results">🧹</a>
           <a class="qif-nav-arrow" href="#page-top" title="Go to top">⬆️</a>
           <a class="qif-nav-arrow" href="#page-bottom" title="Go to bottom">⬇️</a>
         </div>
@@ -151,6 +142,15 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+
+clear_topbar_col, _ = st.columns([1, 12])
+with clear_topbar_col:
+    if st.button("🧹", help="Clear results", use_container_width=True):
+        st.session_state.history = []
+        st.session_state.pending_question = None
+        st.session_state.is_processing = False
+        st.rerun()
 
 results_container = st.container(
     height=st.session_state.results_container_height,
