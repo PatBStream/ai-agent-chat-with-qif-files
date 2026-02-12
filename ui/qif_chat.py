@@ -3,6 +3,7 @@ from datetime import datetime
 
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 
 QIF_API_URL = os.environ.get("QIF_API_URL", "http://qif-agent:8000")
 
@@ -16,6 +17,8 @@ if "pending_question" not in st.session_state:
     st.session_state.pending_question = None
 if "results_container_height" not in st.session_state:
     st.session_state.results_container_height = 420
+if "results_scroll_target" not in st.session_state:
+    st.session_state.results_scroll_target = None
 
 st.markdown(
     """
@@ -55,15 +58,6 @@ st.markdown(
         font-size: 0.9rem;
       }
 
-      .qif-nav-icon {
-        text-decoration: none;
-        font-size: 1.1rem;
-        line-height: 1;
-      }
-
-      .qif-nav-icon:hover {
-        opacity: 0.75;
-      }
     </style>
 
     <a id="page-top"></a>
@@ -136,9 +130,11 @@ with clear_col:
         st.session_state.is_processing = False
         st.rerun()
 with up_col:
-    st.markdown('<a class="qif-nav-icon" href="#page-top" title="Go to top">⬆️</a>', unsafe_allow_html=True)
+    if st.button("⤒", help="Scroll results to top", use_container_width=True, type="secondary"):
+        st.session_state.results_scroll_target = "top"
 with down_col:
-    st.markdown('<a class="qif-nav-icon" href="#page-bottom" title="Go to bottom">⬇️</a>', unsafe_allow_html=True)
+    if st.button("⤓", help="Scroll results to bottom", use_container_width=True, type="secondary"):
+        st.session_state.results_scroll_target = "bottom"
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -155,4 +151,28 @@ with results_container:
         with st.chat_message(entry["role"]):
             st.markdown(entry["content"])
 
-st.markdown('<a id="page-bottom"></a>', unsafe_allow_html=True)
+if st.session_state.results_scroll_target:
+    scroll_target = st.session_state.results_scroll_target
+    components.html(
+        f"""
+        <script>
+          const target = "{scroll_target}";
+          const scrollResultsContainer = () => {{
+            const candidates = Array.from(window.parent.document.querySelectorAll('div[data-testid=\"stVerticalBlock\"]'));
+            const scrollable = candidates.filter((node) => {{
+              const style = window.parent.getComputedStyle(node);
+              return (style.overflowY === 'auto' || style.overflowY === 'scroll') && node.scrollHeight > node.clientHeight;
+            }});
+            if (!scrollable.length) return;
+            const resultsNode = scrollable.sort((a, b) => (b.scrollHeight - b.clientHeight) - (a.scrollHeight - a.clientHeight))[0];
+            resultsNode.scrollTo({{
+              top: target === 'top' ? 0 : resultsNode.scrollHeight,
+              behavior: 'auto',
+            }});
+          }};
+          setTimeout(scrollResultsContainer, 50);
+        </script>
+        """,
+        height=0,
+    )
+    st.session_state.results_scroll_target = None
