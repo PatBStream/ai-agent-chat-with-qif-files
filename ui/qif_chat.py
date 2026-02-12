@@ -3,10 +3,11 @@ from datetime import datetime
 
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 
 QIF_API_URL = os.environ.get("QIF_API_URL", "http://qif-agent:8000")
 
-st.set_page_config(page_title="Chat with My QIF Agent", page_icon="💸", layout="centered")
+st.set_page_config(page_title="Chat with QIF AI Agent", page_icon="💸", layout="wide")
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -14,14 +15,15 @@ if "is_processing" not in st.session_state:
     st.session_state.is_processing = False
 if "pending_question" not in st.session_state:
     st.session_state.pending_question = None
-
-status_icon = "⏳" if st.session_state.is_processing else "✅"
-status_text = "Processing" if st.session_state.is_processing else "Ready"
+if "results_container_height" not in st.session_state:
+    st.session_state.results_container_height = 420
+if "results_scroll_target" not in st.session_state:
+    st.session_state.results_scroll_target = None
 
 st.markdown(
-    f"""
+    """
     <style>
-      #qif-topbar {{
+      .qif-topbar-shell {
         position: sticky;
         top: 0;
         z-index: 1000;
@@ -32,69 +34,33 @@ st.markdown(
         border-radius: 0.5rem;
         padding: 0.45rem 0.75rem;
         margin-bottom: 0.75rem;
-      }}
+      }
 
-      @media (prefers-color-scheme: dark) {{
-        #qif-topbar {{
+      @media (prefers-color-scheme: dark) {
+        .qif-topbar-shell {
           background: rgba(14, 17, 23, 0.95);
           color: #fafafa;
           border: 1px solid rgba(250, 250, 250, 0.2);
-        }}
-      }}
+        }
+      }
 
-      #qif-topbar-content {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.75rem;
+      .qif-topbar-time {
         font-size: 0.92rem;
-      }}
+        font-weight: 600;
+      }
 
-      #qif-topbar-right {{
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-        flex-shrink: 0;
-      }}
-
-      .qif-status-pill {{
-        border: 1px solid currentColor;
-        border-radius: 999px;
-        padding: 0.12rem 0.45rem;
-        white-space: nowrap;
-      }}
-
-      .qif-nav-arrow {{
-        text-decoration: none;
-        font-size: 1.1rem;
-        line-height: 1;
-      }}
-
-      .qif-nav-arrow:hover {{
-        opacity: 0.75;
-      }}
     </style>
 
     <a id="page-top"></a>
-    <div id="qif-topbar">
-      <div id="qif-topbar-content">
-        <div><strong>{datetime.now().strftime('%A, %B %d, %Y at %I:%M:%S %p')}</strong></div>
-        <div id="qif-topbar-right">
-          <span class="qif-status-pill">{status_icon} {status_text}</span>
-          <a class="qif-nav-arrow" href="#page-top" title="Go to top">⬆️</a>
-          <a class="qif-nav-arrow" href="#page-bottom" title="Go to bottom">⬇️</a>
-        </div>
-      </div>
-    </div>
     """,
     unsafe_allow_html=True,
 )
 
-st.title("💸 Chat with My QIF Agent")
+st.title("💸 Chat with QIF Files AI Agent")
 st.markdown(
     """
-    Ask questions about your finances!
-    The agent is trained on your QIF files and can answer queries about transactions.
+    Ask questions about your finances! The agent is trained on your QIF files and can answer queries about transactions.
+    
     The table fields are:
     - **date**: The date of the transaction
     - **payee**: The entity you paid or received money from
@@ -135,8 +101,80 @@ if st.session_state.pending_question:
     st.session_state.is_processing = False
     st.rerun()
 
-for entry in st.session_state.history:
-    with st.chat_message(entry["role"]):
-        st.markdown(entry["content"])
+st.markdown('<div class="qif-topbar-shell">', unsafe_allow_html=True)
+left_col, clear_col, up_col, down_col = st.columns([9, 1, 1, 1])
 
-st.markdown('<a id="page-bottom"></a>', unsafe_allow_html=True)
+with left_col:
+    st.markdown(
+        f'<div class="qif-topbar-time">{datetime.now().strftime("%A, %B %d, %Y at %I:%M:%S %p")}</div>',
+        unsafe_allow_html=True,
+    )
+with clear_col:
+    if st.button("🧹", help="Clear results", use_container_width=True, type="secondary"):
+        st.session_state.history = []
+        st.session_state.pending_question = None
+        st.session_state.is_processing = False
+        st.rerun()
+with up_col:
+    if st.button("⤒", help="Scroll results to top", use_container_width=True, type="secondary"):
+        st.session_state.results_scroll_target = "top"
+with down_col:
+    if st.button("⤓", help="Scroll results to bottom", use_container_width=True, type="secondary"):
+        st.session_state.results_scroll_target = "bottom"
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+results_container = st.container(
+    height=st.session_state.results_container_height,
+    border=True,
+)
+
+with results_container:
+    st.markdown('<div id="results-top-marker"></div>', unsafe_allow_html=True)
+
+    if not st.session_state.history:
+        st.caption("No results yet. Ask a question to see responses here.")
+
+    for entry in st.session_state.history:
+        with st.chat_message(entry["role"]):
+            st.markdown(entry["content"])
+
+    st.markdown('<div id="results-bottom-marker"></div>', unsafe_allow_html=True)
+
+if st.session_state.results_scroll_target:
+    scroll_target = st.session_state.results_scroll_target
+    script = """
+        <script>
+          const target = "__TARGET__";
+          const doc = window.parent.document;
+
+          const findScrollableParent = (el) => {
+            let node = el?.parentElement;
+            while (node) {
+              const style = window.parent.getComputedStyle(node);
+              const canScroll = (style.overflowY === "auto" || style.overflowY === "scroll") && node.scrollHeight > node.clientHeight;
+              if (canScroll) return node;
+              node = node.parentElement;
+            }
+            return null;
+          };
+
+          const scrollResultsContainer = () => {
+            const markerId = target === "top" ? "results-top-marker" : "results-bottom-marker";
+            const marker = doc.getElementById(markerId);
+            if (!marker) return;
+
+            const resultsNode = findScrollableParent(marker);
+            if (!resultsNode) return;
+
+            resultsNode.scrollTo({
+              top: target === "top" ? 0 : resultsNode.scrollHeight,
+              behavior: "auto",
+            });
+          };
+
+          setTimeout(scrollResultsContainer, 50);
+        </script>
+    """.replace("__TARGET__", scroll_target)
+    components.html(script, height=0)
+    st.session_state.results_scroll_target = None
