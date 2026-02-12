@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 
 QIF_API_URL = os.environ.get("QIF_API_URL", "http://qif-agent:8000")
 
-st.set_page_config(page_title="Chat with My QIF Agent", page_icon="💸", layout="centered")
+st.set_page_config(page_title="Chat with My QIF Agent", page_icon="💸", layout="wide")
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -47,15 +47,6 @@ st.markdown(
       .qif-topbar-time {
         font-size: 0.92rem;
         font-weight: 600;
-      }
-
-      .qif-status-pill {
-        border: 1px solid currentColor;
-        border-radius: 999px;
-        padding: 0.12rem 0.45rem;
-        white-space: nowrap;
-        display: inline-block;
-        font-size: 0.9rem;
       }
 
     </style>
@@ -110,19 +101,14 @@ if st.session_state.pending_question:
     st.session_state.is_processing = False
     st.rerun()
 
-status_icon = "⏳" if st.session_state.is_processing else "✅"
-status_text = "Processing" if st.session_state.is_processing else "Ready"
-
 st.markdown('<div class="qif-topbar-shell">', unsafe_allow_html=True)
-left_col, status_col, clear_col, up_col, down_col = st.columns([6, 2.4, 1, 1, 1])
+left_col, clear_col, up_col, down_col = st.columns([9, 1, 1, 1])
 
 with left_col:
     st.markdown(
         f'<div class="qif-topbar-time">{datetime.now().strftime("%A, %B %d, %Y at %I:%M:%S %p")}</div>',
         unsafe_allow_html=True,
     )
-with status_col:
-    st.markdown(f'<span class="qif-status-pill">{status_icon} {status_text}</span>', unsafe_allow_html=True)
 with clear_col:
     if st.button("🧹", help="Clear results", use_container_width=True, type="secondary"):
         st.session_state.history = []
