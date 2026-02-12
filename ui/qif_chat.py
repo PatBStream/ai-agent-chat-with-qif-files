@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 
 QIF_API_URL = os.environ.get("QIF_API_URL", "http://qif-agent:8000")
 
-st.set_page_config(page_title="Chat with My QIF Agent", page_icon="💸", layout="wide")
+st.set_page_config(page_title="Chat with QIF AI Agent", page_icon="💸", layout="wide")
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -59,8 +59,8 @@ st.markdown(
 st.title("💸 Chat with QIF Files AI Agent")
 st.markdown(
     """
-    Ask questions about your finances!
-    The agent is trained on your QIF files and can answer queries about transactions.
+    Ask questions about your finances! The agent is trained on your QIF files and can answer queries about transactions.
+    
     The table fields are:
     - **date**: The date of the transaction
     - **payee**: The entity you paid or received money from
