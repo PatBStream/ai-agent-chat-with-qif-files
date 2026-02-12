@@ -144,6 +144,8 @@ results_container = st.container(
 )
 
 with results_container:
+    st.markdown('<div id="results-top-marker"></div>', unsafe_allow_html=True)
+
     if not st.session_state.history:
         st.caption("No results yet. Ask a question to see responses here.")
 
@@ -151,28 +153,42 @@ with results_container:
         with st.chat_message(entry["role"]):
             st.markdown(entry["content"])
 
+    st.markdown('<div id="results-bottom-marker"></div>', unsafe_allow_html=True)
+
 if st.session_state.results_scroll_target:
     scroll_target = st.session_state.results_scroll_target
-    components.html(
-        f"""
+    script = """
         <script>
-          const target = "{scroll_target}";
-          const scrollResultsContainer = () => {{
-            const candidates = Array.from(window.parent.document.querySelectorAll('div[data-testid=\"stVerticalBlock\"]'));
-            const scrollable = candidates.filter((node) => {{
+          const target = "__TARGET__";
+          const doc = window.parent.document;
+
+          const findScrollableParent = (el) => {
+            let node = el?.parentElement;
+            while (node) {
               const style = window.parent.getComputedStyle(node);
-              return (style.overflowY === 'auto' || style.overflowY === 'scroll') && node.scrollHeight > node.clientHeight;
-            }});
-            if (!scrollable.length) return;
-            const resultsNode = scrollable.sort((a, b) => (b.scrollHeight - b.clientHeight) - (a.scrollHeight - a.clientHeight))[0];
-            resultsNode.scrollTo({{
-              top: target === 'top' ? 0 : resultsNode.scrollHeight,
-              behavior: 'auto',
-            }});
-          }};
+              const canScroll = (style.overflowY === "auto" || style.overflowY === "scroll") && node.scrollHeight > node.clientHeight;
+              if (canScroll) return node;
+              node = node.parentElement;
+            }
+            return null;
+          };
+
+          const scrollResultsContainer = () => {
+            const markerId = target === "top" ? "results-top-marker" : "results-bottom-marker";
+            const marker = doc.getElementById(markerId);
+            if (!marker) return;
+
+            const resultsNode = findScrollableParent(marker);
+            if (!resultsNode) return;
+
+            resultsNode.scrollTo({
+              top: target === "top" ? 0 : resultsNode.scrollHeight,
+              behavior: "auto",
+            });
+          };
+
           setTimeout(scrollResultsContainer, 50);
         </script>
-        """,
-        height=0,
-    )
+    """.replace("__TARGET__", scroll_target)
+    components.html(script, height=0)
     st.session_state.results_scroll_target = None
